@@ -120,10 +120,12 @@ app.use('*', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 EasyDoor API Server running on port ${PORT}`);
   console.log(`📚 API Documentation: http://localhost:${PORT}/api-docs`);
+  console.log(`📚 External API Documentation: http://46.202.168.1:${PORT}/api-docs`);
   console.log(`🔍 Health Check: http://localhost:${PORT}/health`);
+  console.log(`🔍 External Health Check: http://46.202.168.1:${PORT}/health`);
 });
 
 module.exports = app;
