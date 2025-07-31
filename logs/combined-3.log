@@ -1,0 +1,4 @@
+2025-07-31T16:49:10: 🚀 EasyDoor API Server running on port 8009
+2025-07-31T16:49:10: 📚 API Documentation: http://localhost:8009/api-docs
+2025-07-31T16:49:10: 🔍 Health Check: http://localhost:8009/health
+2025-07-31T16:49:10: ✅ Connected to MongoDB
