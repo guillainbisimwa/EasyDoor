@@ -23,11 +23,18 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https:"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-      imgSrc: ["'self'", "data:", "https:"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https:", "http:", "data:"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https:", "http:"],
+      imgSrc: ["'self'", "data:", "https:", "http:", "blob:"],
+      fontSrc: ["'self'", "https:", "http:", "data:"],
+      connectSrc: ["'self'", "https:", "http:"],
+      frameSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      childSrc: ["'self'"],
     },
   },
+  crossOriginEmbedderPolicy: false,
 }));
 app.use(cors({
   origin: '*',
@@ -91,11 +98,35 @@ const swaggerUiOptions = {
     docExpansion: 'none',
     filter: true,
     showRequestDuration: true,
+    tryItOutEnabled: true,
+    url: undefined,
+    urls: [
+      {
+        url: '/api-docs.json',
+        name: 'EasyDoor API'
+      }
+    ],
+    requestInterceptor: (req) => {
+      // Ensure requests work in production
+      req.headers['Access-Control-Allow-Origin'] = '*';
+      return req;
+    },
   },
-  customCss: '.swagger-ui .topbar { display: none }',
+  customCss: `
+    .swagger-ui .topbar { display: none }
+    .swagger-ui .scheme-container { background: #fafafa; }
+  `,
   customSiteTitle: 'EasyDoor API Documentation',
 };
 
+// Serve Swagger JSON spec
+app.get('/api-docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.send(swaggerSpec);
+});
+
+// Serve Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
 
 // Database connection
@@ -121,6 +152,21 @@ app.get('/health', (req, res) => {
     message: 'EasyDoor API is running',
     timestamp: new Date().toISOString(),
     port: PORT
+  });
+});
+
+// Debug endpoint for troubleshooting
+app.get('/debug', (req, res) => {
+  res.status(200).json({
+    environment: process.env.NODE_ENV || 'development',
+    port: PORT,
+    host: req.get('host'),
+    protocol: req.protocol,
+    url: req.url,
+    headers: req.headers,
+    swagger_url: `/api-docs`,
+    swagger_json_url: `/api-docs.json`,
+    timestamp: new Date().toISOString()
   });
 });
 
